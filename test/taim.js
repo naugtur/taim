@@ -3,6 +3,7 @@ const rewire = require('rewire')
 const stream = require('stream')
 const { always } = require('ramda')
 const Promise = require('bluebird')
+const taimNoSetup = require('../src')
 
 const setup = (cb) => {
   const taim = rewire('../src')
@@ -95,4 +96,16 @@ test('bad input error', (t) => {
 
   const taim = setup(cb)
   taim({})
+})
+
+
+test('silent mode - report to a callback', (t) => {
+  const taim = taimNoSetup.setResultCallback((label, value) => {
+    t.equal(label, 'label')
+    t.equal(typeof value, 'number')
+    t.end()
+  })
+
+  const p = Promise.resolve('foo')
+  taim('label', p).then(res => t.equal(res, 'foo'))
 })
